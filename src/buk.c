@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 // #include "help/help.h"
-// #include "init/init.h"
+#include "init/init.h"
 // #include "save/save.h"
 // #include "delete/delete.h"
 // #include "restore/restore.h"
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	}
 	else if (strcmp(option, "init") == 0)
 	{
-		// init();
+		init();
 	}
 	else if (strcmp(option, "save") == 0)
 	{
