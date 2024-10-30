@@ -13,7 +13,7 @@ Similar to Git but focused on backups rather than versioning, and easily integra
 
 ### **Features**
 
-- **Save** backups (single files or entire folders)
+- **Save** backups (single files or entire directories)
 - **Delete** backups
 - **Restore** backups
 
@@ -51,24 +51,24 @@ After installing, you can use the **buk** command as follows:
     buk init
     ```
 
-- **Configure path of backup folder:**
+- **Configure path of backup directory:**
     ```sh
     buk config <PATH>
     ```
 
 - **Save a backup:**
     ```sh
-    buk save <list of files/folders>
+    buk save <list of files/directories>
     ```
 
 - **Delete a backup:**
     ```sh
-    buk delete <list of files/folders>
+    buk delete <list of files/directories>
     ```
 
 - **Restore a backup:**
     ```sh
-    buk restore <list of files/folders>
+    buk restore <list of files/directories>
     ```
 
 - **Show commands list**
