@@ -5,7 +5,7 @@
 #include <unistd.h>     // For getuid() function
 #include <pwd.h>        // For getpwuid() and struct passwd
 #include "init.h"
-#include "../config.h"
+#include "../globals.h"
 
 int init()
 {
