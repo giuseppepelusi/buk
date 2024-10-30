@@ -1,6 +1,6 @@
 #include <stdio.h>		// For printf, fprintf, perror
 #include "help.h"
-#include "../globals.h"
+#include "../utils/globals.h"
 
 void help()
 {
