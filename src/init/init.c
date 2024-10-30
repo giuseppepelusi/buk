@@ -10,13 +10,17 @@
 int init()
 {
 	const char *home_dir = get_home_directory();
+	char *current_working_dir = get_current_working_directory();
 
 	if (create_folder() == EXIT_SUCCESS)
 	{
 		write_config(home_dir);
+		printf("%s: Initialized buk repository in %s/.%s/\n", NAME, current_working_dir, NAME);
+		free(current_working_dir);
+		return EXIT_SUCCESS;
 	}
 
-	return EXIT_SUCCESS;
+	return EXIT_FAILURE;
 }
 
 int create_folder()
@@ -25,12 +29,14 @@ int create_folder()
 	{
 		if (errno == EEXIST)
 		{
-			fprintf(stderr, "The folder is already initialized\n");
+			fprintf(stderr, "%s: The folder is already initialized\n", NAME);
 			return EXIT_FAILURE;
 		}
 		else
 		{
-			perror("Error creating directory");
+			char errorMsg[100];
+			snprintf(errorMsg, sizeof(errorMsg), "%s: Error creating directory", NAME);
+        	perror(errorMsg);
 			return EXIT_FAILURE;
 		}
 	}
@@ -49,17 +55,31 @@ const char *get_home_directory()
     return home_dir;
 }
 
+char *get_current_working_directory()
+{
+    char *cwd = getcwd(NULL, 0);
+    if (cwd == NULL)
+    {
+        char errorMsg[100];
+        snprintf(errorMsg, sizeof(errorMsg), "%s: Error getting current working directory", NAME);
+        perror(errorMsg);
+    }
+    return cwd;
+}
+
 int write_config(const char *home_dir)
 {
     FILE *config_file = fopen(CONFIG_PATH, "w");
     if (config_file)
     {
-        fprintf(config_file, "PATH=%s/.buk_backups\n", home_dir);
+        fprintf(config_file, "PATH=%s/%s\n", home_dir, DEFAULT_BACKUP_DIR);
         fclose(config_file);
     }
     else
     {
-        perror("Error creating config file");
+    	char errorMsg[100];
+        snprintf(errorMsg, sizeof(errorMsg), "%s: Error creating config file", NAME);
+        perror(errorMsg);
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -70,7 +90,9 @@ char *read_config_path()
     FILE *config_file = fopen(CONFIG_PATH, "r");
     if (!config_file)
     {
-        perror("Error opening config file");
+    	char errorMsg[100];
+    	snprintf(errorMsg, sizeof(errorMsg), "%s: Error opening config file", NAME);
+    	perror(errorMsg);
         return NULL;
     }
 
@@ -82,6 +104,6 @@ char *read_config_path()
     }
 
     fclose(config_file);
-    fprintf(stderr, "Error: PATH not found in config file\n");
+    fprintf(stderr, "%s: Error: PATH not found in config file\n", NAME);
     return NULL;
 }

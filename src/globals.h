@@ -1,7 +1,9 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define DIR_NAME ".buk"
-#define CONFIG_PATH ".buk/config"
+#define NAME "buk"
+#define DIR_NAME "." NAME
+#define CONFIG_PATH "." NAME "/config"
+#define DEFAULT_BACKUP_DIR "." NAME "_backups"
 
 #endif // GLOBALS_H
