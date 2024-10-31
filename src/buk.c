@@ -4,7 +4,7 @@
 #include "utils/globals.h"
 #include "help/help.h"
 #include "init/init.h"
-// #include "config/config.h"
+#include "config/config.h"
 // #include "save/save.h"
 // #include "delete/delete.h"
 // #include "restore/restore.h"
@@ -38,8 +38,7 @@ int main(int argc, char *argv[])
 			help_config();
 			return EXIT_FAILURE;
 		}
-		printf("config_test");
-		// config();
+		config(argv);
 	}
 	else if (strcmp(option, "save") == 0)
 	{
