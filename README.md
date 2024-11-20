@@ -19,7 +19,7 @@ Similar to Git but focused on backups rather than versioning, and easily integra
 
 ### **Install**
 
-To install Buk, follow these steps:
+To install **buk**, follow these steps:
 
 1. **Clone the repository:**
    ```sh
@@ -46,39 +46,39 @@ To install Buk, follow these steps:
 
 After installing, you can use the **buk** command as follows:
 
-- **Initialize a backup repository:**
+- **Initialize the current repository:**
     ```sh
     buk init
     ```
 
-- **Configure path of backup directory:**
+- **Configure the backup directory path (default: /home/username/.buk_backups):**
     ```sh
     buk config <PATH>
     ```
 
 - **Save a backup:**
     ```sh
-    buk save <list of files/directories>
+    buk save <file|dir> [<file|dir>...]
     ```
 
 - **Delete a backup:**
     ```sh
-    buk delete <list of files/directories>
+    buk delete <file|dir> [<file|dir>...]
     ```
 
 - **Restore a backup:**
     ```sh
-    buk restore <list of files/directories>
+    buk restore <file|dir> [<file|dir>...]
     ```
 
-- **Show commands list**
+- **Show the list of available commands**
 	```sh
 	buk help
 	```
 
 ### **Uninstall**
 
-To uninstall **Buk**, run the following command:
+To uninstall **buk**:
 
 - **Run the uninstaller script:**
     ```sh
