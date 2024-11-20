@@ -1,11 +1,11 @@
-#include <stdio.h>		// For printf, fprintf, perror
+#include <stdio.h>		// For printf, fprintf
 #include <stdlib.h>		// For EXIT_SUCCESS, EXIT_FAILURE
 #include <string.h>		// For strcmp
 #include "utils/globals.h"
 #include "help/help.h"
 #include "init/init.h"
 #include "config/config.h"
-// #include "save/save.h"
+#include "save/save.h"
 // #include "delete/delete.h"
 // #include "restore/restore.h"
 
@@ -21,6 +21,10 @@ int main(int argc, char *argv[])
 	else if (strcmp(option, "help") == 0)
 	{
 		help();
+	}
+	else if (strcmp(option, "--version") == 0)
+	{
+		printf("%s version %s\n", NAME, VERSION);
 	}
 	else if (strcmp(option, "init") == 0)
 	{
@@ -47,7 +51,7 @@ int main(int argc, char *argv[])
 			help_save();
 			return EXIT_FAILURE;
 		}
-		// save();
+		save(argc, argv);
 	}
 	else if (strcmp(option, "delete") == 0)
 	{
