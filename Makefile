@@ -21,7 +21,7 @@ compile: $(OBJ)
 	$(CC) $(OBJ) -o $(EXEC) $(LIB)
 	echo "$(YELLOW)•$(RESET) Compiled"
 
-clean:
+clear:
 	rm -rf bin
 	echo "$(YELLOW)•$(RESET) Removed executable and objects"
 
@@ -33,5 +33,5 @@ uninstall:
 	sudo rm -f $(INSTALL_PATH)/$(NAME)
 	echo "$(RED)•$(RESET) Uninstalled \033[1;32m$(NAME)$(RESET) from $(BLUE)$(INSTALL_PATH)$(RESET)"
 
-.PHONY: all compile clean install uninstall
-.SILENT: all compile clean install uninstall
+.PHONY: all compile clear install uninstall
+.SILENT: all compile clear install uninstall
