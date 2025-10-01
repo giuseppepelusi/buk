@@ -5,6 +5,6 @@
 #define DIR_NAME "." NAME
 #define CONFIG_FILE "config"
 #define DEFAULT_BACKUP_DIR "." NAME "_backups"
-#define VERSION "0.4.0-alpha"
+#define VERSION "0.5.0-alpha"
 
 #endif // GLOBALS_H
