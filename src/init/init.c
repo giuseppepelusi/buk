@@ -6,7 +6,7 @@
 #include "../utils/globals.h"
 #include "../utils/utils.h"
 
-int init()
+int buk_init()
 {
 	char *home_dir = get_home_directory();
 	if (home_dir == NULL)

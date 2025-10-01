@@ -7,7 +7,7 @@
 #include "../utils/utils.h"
 #include "../utils/globals.h"
 
-int config(char *argv[])
+int buk_config(char *argv[])
 {
 	char *project_root = get_project_root();
 	if (project_root == NULL)

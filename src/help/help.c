@@ -2,7 +2,7 @@
 #include "help.h"
 #include "../utils/globals.h"
 
-void help()
+void buk_help()
 {
 	printf("usage: %s <command> [<args>]\n\n", NAME);
 	printf("These are the available %s commands:\n", NAME);
@@ -14,35 +14,35 @@ void help()
 	printf("  restore:\tRestore the passed files or directories from the backup\n\t\tdirectory to the local directory\n");
 }
 
-void help_init()
+void buk_help_init()
 {
 	printf("%s: malformed expression\n\n", NAME);
 	printf("usage: %s init\n", NAME);
 	printf("Use \"%s help\" for additional information\n", NAME);
 }
 
-void help_config()
+void buk_help_config()
 {
 	printf("%s: malformed expression\n\n", NAME);
 	printf("usage: %s config <path>\n", NAME);
 	printf("Use \"%s help\" for additional information\n", NAME);
 }
 
-void help_save()
+void buk_help_save()
 {
 	printf("%s: malformed expression\n\n", NAME);
 	printf("usage: %s save <file|dir> [<file|dir>...]\n", NAME);
 	printf("Use \"%s help\" for additional information\n", NAME);
 }
 
-void help_delete()
+void buk_help_delete()
 {
 	printf("%s: malformed expression\n\n", NAME);
 	printf("usage: %s delete <file|dir> [<file|dir>...]\n", NAME);
 	printf("Use \"%s help\" for additional information\n", NAME);
 }
 
-void help_restore()
+void buk_help_restore()
 {
 	printf("%s: malformed expression\n\n", NAME);
 	printf("usage: %s restore <file|dir> [<file|dir>...]\n", NAME);

@@ -7,7 +7,7 @@
 #include "../utils/utils.h"
 #include "../utils/globals.h"
 
-int save(int argc, char *argv[])
+int buk_save(int argc, char *argv[])
 {
     char *project_root = get_project_root();
     if (project_root == NULL)
