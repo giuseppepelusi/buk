@@ -80,6 +80,14 @@ static int process_path(const char *path, const char *temp_backup_dir, const cha
      	return EXIT_SUCCESS;
     }
 
+    char buk_path[PATH_MAX];
+    snprintf(buk_path, PATH_MAX, "%s/%s", project_root, DIR_NAME);
+    if (strncmp(absolute_path, buk_path, strlen(buk_path)) == 0)
+    {
+        printf("%s: \"%s\" directory or any of its contents cannot be saved\n", NAME, DIR_NAME);
+        return EXIT_SUCCESS;
+    }
+
     char destination_path[PATH_MAX * 2];
     char relative_path[PATH_MAX];
     if (strcmp(absolute_path, project_root) == 0)
