@@ -6,7 +6,7 @@
 #include <pwd.h>        // For getpwuid, struct passwd
 #include <string.h>     // For strcmp, strrchr, strdup, strncpy
 #include <limits.h>     // For PATH_MAX
-#include <zip.h>        // For zip_open, zip_close, zip_fopen, zip_fread, zip_fclose
+#include "../miniz/miniz.h"  // For miniz zip functions
 #include <dirent.h>     // For opendir, readdir, closedir, struct dirent
 #include <fcntl.h>      // For O_RDONLY, O_WRONLY, O_CREAT, O_TRUNC, open
 #include "utils.h"
@@ -372,24 +372,33 @@ int remove_directory(const char *path)
 
 int zip_directory(const char *source_directory, const char *output_zip)
 {
-    zip_t *zip = zip_open(output_zip, ZIP_CREATE | ZIP_TRUNCATE, NULL);
-    if (!zip)
+    mz_zip_archive zip;
+    mz_zip_zero_struct(&zip);
+
+    if (!mz_zip_writer_init_file(&zip, output_zip, 0))
     {
         fprintf(stderr, "%s: Error opening zip file %s\n", NAME, output_zip);
         return EXIT_FAILURE;
     }
 
-    if (add_files_to_zip(source_directory, zip, "") == EXIT_FAILURE)
+    if (add_files_to_zip(source_directory, &zip, "") == EXIT_FAILURE)
     {
-        zip_close(zip);
+        mz_zip_writer_end(&zip);
         return EXIT_FAILURE;
     }
 
-    zip_close(zip);
+    if (!mz_zip_writer_finalize_archive(&zip))
+    {
+        fprintf(stderr, "%s: Error finalizing zip archive %s\n", NAME, output_zip);
+        mz_zip_writer_end(&zip);
+        return EXIT_FAILURE;
+    }
+
+    mz_zip_writer_end(&zip);
     return EXIT_SUCCESS;
 }
 
-int add_files_to_zip(const char *directory, zip_t *zip, const char *base_name)
+int add_files_to_zip(const char *directory, mz_zip_archive *zip, const char *base_name)
 {
     struct dirent *entry;
     DIR *dp = opendir(directory);
@@ -412,7 +421,15 @@ int add_files_to_zip(const char *directory, zip_t *zip, const char *base_name)
         char full_path[PATH_MAX];
         snprintf(full_path, sizeof(full_path), "%s/%s", directory, entry->d_name);
         char zip_path[PATH_MAX];
-        snprintf(zip_path, sizeof(zip_path), "%s/%s", base_name, entry->d_name);
+
+        if (strlen(base_name) > 0)
+        {
+            snprintf(zip_path, sizeof(zip_path), "%s/%s", base_name, entry->d_name);
+        }
+        else
+        {
+            snprintf(zip_path, sizeof(zip_path), "%s", entry->d_name);
+        }
 
         if (entry->d_type == DT_DIR)
         {
@@ -424,22 +441,20 @@ int add_files_to_zip(const char *directory, zip_t *zip, const char *base_name)
         }
         else
         {
-            zip_source_t *source = zip_source_file(zip, full_path, 0, 0);
-            if (source == NULL || zip_file_add(zip, zip_path, source, ZIP_FL_OVERWRITE) < 0)
+            if (!mz_zip_writer_add_file(zip, zip_path, full_path, NULL, 0, MZ_DEFAULT_COMPRESSION))
             {
                 fprintf(stderr, "%s: Error adding file %s\n", NAME, full_path);
-                zip_source_free(source);
                 closedir(dp);
                 return EXIT_FAILURE;
             }
         }
     }
 
-    if (is_empty)
+    if (is_empty && strlen(base_name) > 0)
     {
         char zip_path[PATH_MAX];
         snprintf(zip_path, sizeof(zip_path), "%s/", base_name);
-        if (zip_dir_add(zip, zip_path, ZIP_FL_ENC_UTF_8) < 0)
+        if (!mz_zip_writer_add_mem(zip, zip_path, "", 0, MZ_DEFAULT_COMPRESSION))
         {
             fprintf(stderr, "%s: Error adding empty directory %s\n", NAME, directory);
             closedir(dp);
@@ -453,58 +468,53 @@ int add_files_to_zip(const char *directory, zip_t *zip, const char *base_name)
 
 int unzip_directory(const char *zip_file, const char *output_folder)
 {
-    int err = 0;
-    struct zip *za = zip_open(zip_file, 0, &err);
-    if (za == NULL)
+    mz_zip_archive zip;
+    mz_zip_zero_struct(&zip);
+
+    if (!mz_zip_reader_init_file(&zip, zip_file, 0))
     {
-        fprintf(stderr, "Cannot open zip archive %s: %s\n", zip_file, zip_strerror(za));
+        fprintf(stderr, "Cannot open zip archive %s\n", zip_file);
         return EXIT_FAILURE;
     }
 
     if (mkdir_p(output_folder, 0755) != 0)
     {
         fprintf(stderr, "Cannot create output directory %s\n", output_folder);
-        zip_close(za);
+        mz_zip_reader_end(&zip);
         return EXIT_FAILURE;
     }
 
-    zip_int64_t num_entries = zip_get_num_entries(za, 0);
-    for (zip_uint64_t i = 0; i < num_entries; i++)
+    mz_uint num_entries = mz_zip_reader_get_num_files(&zip);
+    for (mz_uint i = 0; i < num_entries; i++)
     {
-        const char *name = zip_get_name(za, i, 0);
-        if (name == NULL)
+        mz_zip_archive_file_stat file_stat;
+        if (!mz_zip_reader_file_stat(&zip, i, &file_stat))
         {
-            fprintf(stderr, "Cannot get name for entry %lu: %s\n", i, zip_strerror(za));
-            zip_close(za);
+            fprintf(stderr, "Cannot get file stat for entry %u\n", i);
+            mz_zip_reader_end(&zip);
             return EXIT_FAILURE;
         }
 
         char full_path[PATH_MAX];
-        snprintf(full_path, sizeof(full_path), "%s%s", output_folder, name);
+        snprintf(full_path, sizeof(full_path), "%s/%s", output_folder, file_stat.m_filename);
 
-        struct zip_stat st;
-        zip_stat_init(&st);
-        zip_stat(za, name, 0, &st);
-
-        if (name[strlen(name) - 1] == '/')
+        if (file_stat.m_is_directory)
         {
+       		mode_t dir_mode = 0755;
+            if (file_stat.m_external_attr != 0)
+            {
+                dir_mode = (file_stat.m_external_attr >> 16) & 0777;
+            }
+
             if (mkdir_p(full_path, 0755) != 0)
             {
                 fprintf(stderr, "Cannot create directory %s\n", full_path);
-                zip_close(za);
+                mz_zip_reader_end(&zip);
                 return EXIT_FAILURE;
             }
         }
         else
         {
-            struct zip_file *zf = zip_fopen(za, name, 0);
-            if (!zf)
-            {
-                fprintf(stderr, "Cannot open file %s in zip archive: %s\n", name, zip_strerror(za));
-                zip_close(za);
-                return EXIT_FAILURE;
-            }
-
             char *last_slash = strrchr(full_path, '/');
             if (last_slash != NULL)
             {
@@ -512,34 +522,30 @@ int unzip_directory(const char *zip_file, const char *output_folder)
                 if (mkdir_p(full_path, 0755) != 0)
                 {
                     fprintf(stderr, "Cannot create directory %s\n", full_path);
-                    zip_fclose(zf);
-                    zip_close(za);
+                    mz_zip_reader_end(&zip);
                     return EXIT_FAILURE;
                 }
                 *last_slash = '/';
             }
 
-            FILE *fout = fopen(full_path, "wb");
-            if (!fout)
+            if (!mz_zip_reader_extract_to_file(&zip, i, full_path, 0))
             {
-                fprintf(stderr, "Cannot open destination file %s\n", full_path);
-                zip_fclose(zf);
-                zip_close(za);
+                fprintf(stderr, "Cannot extract file %s\n", file_stat.m_filename);
+                mz_zip_reader_end(&zip);
                 return EXIT_FAILURE;
             }
 
-            char buffer[8192];
-            zip_int64_t bytes_read;
-            while ((bytes_read = zip_fread(zf, buffer, 8192)) > 0)
+            if (file_stat.m_external_attr != 0)
             {
-                fwrite(buffer, bytes_read, 1, fout);
+                mode_t mode = (file_stat.m_external_attr >> 16) & 0777;
+                if (chmod(full_path, mode) != 0)
+                {
+                    fprintf(stderr, "%s: Warning: Could not set permissions for %s\n", NAME, full_path);
+                }
             }
-
-            fclose(fout);
-            zip_fclose(zf);
         }
     }
 
-    zip_close(za);
+    mz_zip_reader_end(&zip);
     return EXIT_SUCCESS;
 }
