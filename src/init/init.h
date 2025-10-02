@@ -1,6 +1,6 @@
 #ifndef INIT_H
 #define INIT_H
 
-int init();
+int buk_init();
 
 #endif // INIT_H

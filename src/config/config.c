@@ -1,17 +1,236 @@
 #include <stdio.h>		// For printf, fprintf, perror
 #include <stdlib.h>		// For EXIT_SUCCESS, EXIT_FAILURE
+#include <limits.h>     // For PATH_MAX
+#include <string.h>     // For strlen, strncpy, strstr
+#include <unistd.h>     // For access
 #include "config.h"
 #include "../utils/utils.h"
 #include "../utils/globals.h"
 
-int config(char *argv[])
+int buk_config(char *argv[])
 {
-	char *path_to_backup = argv[2];
-	if (write_config_path(path_to_backup) == EXIT_SUCCESS)
+	char *project_root = get_project_root();
+	if (project_root == NULL)
 	{
-		printf("%s: Backup path updated successfully. New path: %s\n", NAME, path_to_backup);
-		return EXIT_SUCCESS;
+		return EXIT_FAILURE;
 	}
 
-	return EXIT_FAILURE;
+ 	char *old_config_path = read_config_path();
+    if (old_config_path == NULL)
+    {
+    	free(project_root);
+        return EXIT_FAILURE;
+    }
+
+    char *dir_name = extract_dir_name(project_root);
+    if (dir_name == NULL)
+    {
+        free(project_root);
+        return EXIT_FAILURE;
+    }
+
+	char *path_to_backup = argv[2];
+	char resolved_path[PATH_MAX];
+
+    if (validate_and_resolve_path(path_to_backup, resolved_path) == EXIT_SUCCESS)
+    {
+        if (write_config_path(resolved_path) == EXIT_SUCCESS)
+        {
+        	printf("%s: Backup path updated successfully. New path: %s\n", NAME, resolved_path);
+        }
+        else
+        {
+            printf("%s: Error writing config file\n", NAME);
+            free(dir_name);
+		    free(project_root);
+            return EXIT_FAILURE;
+        }
+
+        char old_backup[PATH_MAX*2];
+		snprintf(old_backup, PATH_MAX*2, "%s/%s.zip", old_config_path, dir_name);
+
+		char new_backup[PATH_MAX*2];
+		snprintf(new_backup, PATH_MAX*2, "%s/%s.zip", resolved_path, dir_name);
+
+       	if (check_if_is_file(old_backup) == EXIT_SUCCESS)
+        {
+		    if (move_backup(old_backup, new_backup) == EXIT_SUCCESS)
+		    {
+		   		printf("%s: Backup moved to new path successfully\n", NAME);
+		     	free(dir_name);
+		    	free(project_root);
+				return EXIT_SUCCESS;
+		    }
+		   	else
+		   	{
+		    	printf("%s: Error moving backup to new path\n", NAME);
+		    	free(dir_name);
+		    	free(project_root);
+				return EXIT_FAILURE;
+		    }
+        }
+    }
+    else
+    {
+        free(dir_name);
+        free(project_root);
+        return EXIT_FAILURE;
+    }
+
+    free(dir_name);
+    free(project_root);
+    return EXIT_SUCCESS;
+}
+
+int is_path_in_safe_location(const char *path)
+{
+    char *home_dir = get_home_directory();
+
+    if (home_dir != NULL && strstr(path, home_dir) == path)
+    {
+        return EXIT_SUCCESS;
+    }
+
+    if (strstr(path, "/tmp") == path)
+    {
+        return EXIT_SUCCESS;
+    }
+
+    return EXIT_FAILURE;
+}
+
+char* get_first_existing_parent(const char *path)
+{
+    char *temp_path = malloc(PATH_MAX);
+    if (temp_path == NULL)
+    {
+        return NULL;
+    }
+
+    strncpy(temp_path, path, PATH_MAX);
+    temp_path[PATH_MAX - 1] = '\0';
+
+    while (strlen(temp_path) > 1)
+    {
+        if (access(temp_path, F_OK) == 0)
+        {
+            return temp_path;
+        }
+
+        char *last_slash = strrchr(temp_path, '/');
+        if (last_slash == NULL || last_slash == temp_path)
+        {
+            strcpy(temp_path, "/");
+            break;
+        }
+
+        *last_slash = '\0';
+    }
+
+    return temp_path;
+}
+
+int validate_and_resolve_path(const char *input_path, char *resolved_path)
+{
+    char working_path[PATH_MAX];
+
+    if (input_path[0] != '/')
+    {
+        char *cwd = get_current_working_directory();
+        if (cwd == NULL)
+        {
+            return EXIT_FAILURE;
+        }
+        snprintf(working_path, PATH_MAX, "%s/%s", cwd, input_path);
+        free(cwd);
+    }
+    else
+    {
+        strncpy(working_path, input_path, PATH_MAX);
+        working_path[PATH_MAX - 1] = '\0';
+    }
+
+    if (realpath(working_path, resolved_path) != NULL)
+    {
+        if (check_if_is_directory(resolved_path) != EXIT_SUCCESS)
+        {
+            printf("%s: \"%s\" exists but is not a directory. Backup path must be a directory\n", NAME, input_path);
+            return EXIT_FAILURE;
+        }
+
+        if (is_path_in_safe_location(resolved_path) != EXIT_SUCCESS)
+        {
+            printf("%s: \"%s\" is not in a safe location. Path must be under your home directory or /tmp\n", NAME, resolved_path);
+            return EXIT_FAILURE;
+        }
+
+        return EXIT_SUCCESS;
+    }
+
+    char *parent_path = get_first_existing_parent(working_path);
+    if (parent_path == NULL)
+    {
+        return EXIT_FAILURE;
+    }
+
+    char resolved_parent[PATH_MAX];
+    if (realpath(parent_path, resolved_parent) == NULL)
+    {
+        free(parent_path);
+        return EXIT_FAILURE;
+    }
+    free(parent_path);
+
+    if (access(resolved_parent, W_OK) != 0)
+    {
+        printf("%s: Cannot write to parent directory \"%s\". Permission denied\n", NAME, resolved_parent);
+        return EXIT_FAILURE;
+    }
+
+    if (is_path_in_safe_location(working_path) != EXIT_SUCCESS)
+    {
+        printf("%s: \"%s\" is not in a safe location. Path must be under your home directory or /tmp\n", NAME, input_path);
+        return EXIT_FAILURE;
+    }
+
+    strncpy(resolved_path, working_path, PATH_MAX);
+    resolved_path[PATH_MAX - 1] = '\0';
+
+    return EXIT_SUCCESS;
+}
+
+int move_backup(const char *source_path, const char *destination_path)
+{
+    if (source_path == NULL || destination_path == NULL)
+    {
+        fprintf(stderr, "%s: Invalid paths provided to move_backup\n", NAME);
+        return EXIT_FAILURE;
+    }
+
+    if (check_if_is_file(source_path) != EXIT_SUCCESS)
+    {
+        fprintf(stderr, "%s: Source file %s does not exist or is not a regular file\n", NAME, source_path);
+        return EXIT_FAILURE;
+    }
+
+    char destination_dir[PATH_MAX];
+    strncpy(destination_dir, destination_path, PATH_MAX);
+    char *last_slash = strrchr(destination_dir, '/');
+    if (last_slash != NULL)
+    {
+        *last_slash = '\0';
+        if (mkdir_p(destination_dir, 0755) == EXIT_FAILURE)
+        {
+            fprintf(stderr, "%s: Cannot create destination directory %s\n", NAME, destination_dir);
+            return EXIT_FAILURE;
+        }
+    }
+
+    if (rename(source_path, destination_path) != 0)
+    {
+        print_perror("Error moving backup file");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }

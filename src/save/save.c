@@ -1,13 +1,12 @@
 #include <stdio.h>        // For snprintf
 #include <stdlib.h>       // For EXIT_SUCCESS, EXIT_FAILURE
-#include <sys/stat.h>     // For mkdir
 #include <string.h>       // For strcmp, strlen
 #include <limits.h>       // For PATH_MAX
 #include "save.h"
 #include "../utils/utils.h"
 #include "../utils/globals.h"
 
-int save(int argc, char *argv[])
+int buk_save(int argc, char *argv[])
 {
     char *project_root = get_project_root();
     if (project_root == NULL)
@@ -80,18 +79,26 @@ static int process_path(const char *path, const char *temp_backup_dir, const cha
      	return EXIT_SUCCESS;
     }
 
-    char *relative_path;
+    char buk_path[PATH_MAX];
+    snprintf(buk_path, PATH_MAX, "%s/%s", project_root, DIR_NAME);
+    if (strncmp(absolute_path, buk_path, strlen(buk_path)) == 0)
+    {
+        printf("%s: \"%s\" directory or any of its contents cannot be saved\n", NAME, DIR_NAME);
+        return EXIT_SUCCESS;
+    }
+
+    char destination_path[PATH_MAX * 2];
+    char relative_path[PATH_MAX];
     if (strcmp(absolute_path, project_root) == 0)
     {
-        relative_path = extract_dir_name(project_root);
+        snprintf(relative_path, PATH_MAX, "%s", extract_dir_name(project_root));
+        snprintf(destination_path, PATH_MAX * 2, "%s", temp_backup_dir);
     }
     else
     {
-        relative_path = absolute_path + strlen(project_root) + 1;
+        snprintf(relative_path, PATH_MAX, "%s", absolute_path + strlen(project_root) + 1);
+        snprintf(destination_path, PATH_MAX * 2, "%s/%s", temp_backup_dir, relative_path);
     }
-
-    char destination_path[PATH_MAX];
-    snprintf(destination_path, PATH_MAX, "%s/%s", temp_backup_dir, relative_path);
 
     if (check_if_is_directory(path) == EXIT_SUCCESS)
     {

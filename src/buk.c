@@ -6,7 +6,7 @@
 #include "init/init.h"
 #include "config/config.h"
 #include "save/save.h"
-// #include "delete/delete.h"
+#include "delete/delete.h"
 // #include "restore/restore.h"
 
 int main(int argc, char *argv[])
@@ -15,12 +15,12 @@ int main(int argc, char *argv[])
 
 	if (argc < 2)
 	{
-		help();
+		buk_help();
 		return EXIT_FAILURE;
 	}
 	else if (strcmp(option, "help") == 0)
 	{
-		help();
+		buk_help();
 	}
 	else if (strcmp(option, "--version") == 0)
 	{
@@ -30,46 +30,46 @@ int main(int argc, char *argv[])
 	{
 		if (argc > 2)
 		{
-			help_init();
+			buk_help_init();
 			return EXIT_FAILURE;
 		}
-		init();
+		buk_init();
 	}
 	else if (strcmp(option, "config") == 0)
 	{
 		if (argc != 3)
 		{
-			help_config();
+			buk_help_config();
 			return EXIT_FAILURE;
 		}
-		config(argv);
+		buk_config(argv);
 	}
 	else if (strcmp(option, "save") == 0)
 	{
 		if (argc < 3)
 		{
-			help_save();
+			buk_help_save();
 			return EXIT_FAILURE;
 		}
-		save(argc, argv);
+		buk_save(argc, argv);
 	}
 	else if (strcmp(option, "delete") == 0)
 	{
 		if (argc < 3)
 		{
-			help_delete();
+			buk_help_delete();
 			return EXIT_FAILURE;
 		}
-		// delete();
+		buk_delete(argc, argv);
 	}
 	else if (strcmp(option, "restore") == 0)
 	{
 		if (argc < 3)
 		{
-			help_restore();
+			buk_help_restore();
 			return EXIT_FAILURE;
 		}
-		// restore();
+		// buk_restore();
 	}
 	else
 	{
