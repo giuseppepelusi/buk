@@ -6,7 +6,7 @@
 #include "init/init.h"
 #include "config/config.h"
 #include "save/save.h"
-// #include "delete/delete.h"
+#include "delete/delete.h"
 // #include "restore/restore.h"
 
 int main(int argc, char *argv[])
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 			buk_help_delete();
 			return EXIT_FAILURE;
 		}
-		// buk_delete();
+		buk_delete(argc, argv);
 	}
 	else if (strcmp(option, "restore") == 0)
 	{
