@@ -1,6 +1,5 @@
 #include <stdio.h>        // For snprintf
 #include <stdlib.h>       // For EXIT_SUCCESS, EXIT_FAILURE
-#include <sys/stat.h>     // For mkdir
 #include <string.h>       // For strcmp, strlen
 #include <limits.h>       // For PATH_MAX
 #include "save.h"
