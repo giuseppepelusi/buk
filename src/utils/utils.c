@@ -165,7 +165,7 @@ char *get_project_root()
 		}
     }
 
-    fprintf(stderr, "%s: Not a %s repository (or any of the parent directories)\n", NAME, NAME);
+    fprintf(stderr, "fatal: Not a %s repository (or any of the parent directories): .%s\n", NAME, NAME);
     free(buk_dir);
     free(current_working_dir);
 
