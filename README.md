@@ -53,7 +53,7 @@ After installing, you can use the **buk** command as follows:
 
 - **Configure the backup directory path (default: /home/username/.buk_backups):**
     ```sh
-    buk config <PATH>
+    buk config <path>
     ```
 
 - **Save a backup:**
@@ -73,7 +73,19 @@ After installing, you can use the **buk** command as follows:
 
 - **Show the list of available commands**
 	```sh
-	buk help
+	buk -h
+	buk --help
+	```
+
+- **Show the version that was installed**
+	```sh
+	buk -v
+	buk --version
+	```
+
+- **Show the man page**
+	```sh
+	man buk
 	```
 
 ### **Uninstall**

@@ -18,11 +18,11 @@ int main(int argc, char *argv[])
 		buk_help();
 		return EXIT_FAILURE;
 	}
-	else if (strcmp(option, "help") == 0)
+	else if (strcmp(option, "--help") == 0 || strcmp(option, "-h") == 0)
 	{
 		buk_help();
 	}
-	else if (strcmp(option, "--version") == 0)
+	else if (strcmp(option, "--version") == 0 || strcmp(option, "-v") == 0)
 	{
 		printf("%s version %s\n", NAME, VERSION);
 	}
