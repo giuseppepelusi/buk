@@ -84,3 +84,49 @@ To uninstall **buk**:
     ```sh
     make uninstall
     ```
+
+### **Flow diagrams**
+
+Below are the flow diagrams for each command. Click on a command to expand its diagram:
+
+<details>
+<summary>help</summary>
+
+![help flow](doc/diagrams/help.svg)
+
+</details>
+
+<details>
+<summary>init</summary>
+
+![init flow](doc/diagrams/init.svg)
+
+</details>
+
+</details>
+
+<details>
+<summary>config</summary>
+
+![config flow](doc/diagrams/config.svg)
+
+</details>
+
+<details>
+<summary>save</summary>
+
+![save flow](doc/diagrams/save.svg)
+
+</details>
+
+<details>
+<summary>delete</summary>
+
+![delete flow](doc/diagrams/delete.svg)
+
+</details>
+
+<details>
+<summary>restore</summary>
+
+![restore flow](doc/diagrams/restore.svg)
