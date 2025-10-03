@@ -7,7 +7,7 @@
 #include "config/config.h"
 #include "save/save.h"
 #include "delete/delete.h"
-// #include "restore/restore.h"
+#include "restore/restore.h"
 
 int main(int argc, char *argv[])
 {
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 			buk_help_restore();
 			return EXIT_FAILURE;
 		}
-		// buk_restore();
+		buk_restore(argc, argv);
 	}
 	else
 	{
