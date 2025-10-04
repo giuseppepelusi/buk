@@ -1,0 +1,33 @@
+#compdef buk
+
+_buk()
+{
+    local -a commands=(
+        "init:initialize the current repository"
+        "config:configure the backup directory path"
+        "save:save a backup"
+        "restore:restore a backup"
+        "delete:delete a backup"
+    )
+
+    (( CURRENT == 2 )) && { _describe 'command' commands; return }
+
+    case $words[2] in
+        config)
+            (( CURRENT != 3 )) && return
+
+            local cur="${words[CURRENT]}" show_hidden=false
+
+            [[ "$cur" == .* || ("$cur" == */ && "$cur" == */.* ) || "$cur" == */. ]] && show_hidden=true
+
+            if [[ "$cur" == /* ]]; then
+                [[ $show_hidden == true ]] && _files -g '*' -g '.*' -F "(.buk .buk/*)" || _files -g '*' -F "(.buk .buk/*)"
+            else
+                [[ $show_hidden == true ]] && _files -W ~ -P '~/' -g '*' -g '.*' -F "(.buk .buk/*)" || _files -W ~ -P '~/' -g '*' -F "(.buk .buk/*)"
+            fi
+            ;;
+        save|restore|delete)
+            _files -g '*(D)' -F "(.buk .buk/*)"
+            ;;
+    esac
+}

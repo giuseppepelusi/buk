@@ -1,0 +1,61 @@
+#!/bin/bash
+
+_buk_completions()
+{
+    local cur second_word commands
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    second_word="${COMP_WORDS[1]}"
+    commands="init config save restore delete"
+
+    if [[ ${COMP_CWORD} == 1 ]]; then
+        COMPREPLY=( $(compgen -W "${commands}" -- "${cur}") )
+    else
+        case "${second_word}" in
+            init)
+                COMPREPLY=()
+                ;;
+            config)
+                [[ ${COMP_CWORD} != 2 ]] && return
+
+                local completions show_hidden=false
+
+                if [[ "${cur}" == /* ]]; then
+                    [[ "${cur}" == /.* || "${cur}" == */. || "${cur}" == */.* ]] && show_hidden=true
+                    completions=( $(compgen -f -- "${cur}" 2>/dev/null) )
+
+                    local filtered_completions=()
+                    for item in "${completions[@]}"; do
+                        [[ "$item" == "/.buk" || "$item" == /.buk/* ]] && continue
+                        [[ "$show_hidden" == true || "$(basename "$item")" != .* ]] && filtered_completions+=("$item")
+                    done
+
+                    COMPREPLY=( "${filtered_completions[@]}" )
+                else
+                    [[ "${cur}" == .* ]] && show_hidden=true
+
+                    local home_completions=( $(cd ~ && compgen -f -- "${cur}" 2>/dev/null) )
+
+                    local filtered_completions=()
+                    for item in "${home_completions[@]}"; do
+                        [[ "$item" == ".buk" || "$item" == .buk/* ]] && continue
+                        [[ "$show_hidden" == true || "$item" != .* ]] && filtered_completions+=("$item")
+                    done
+
+                    COMPREPLY=( "${filtered_completions[@]/#/~/}" )
+                fi
+                ;;
+            save|restore|delete)
+                local all_completions=( $(compgen -f -- "${cur}") )
+                local filtered_completions=()
+
+                for item in "${all_completions[@]}"; do
+                    [[ "$item" == ".buk" || "$item" == .buk/* ]] || filtered_completions+=("$item")
+                done
+
+                COMPREPLY=( "${filtered_completions[@]}" )
+                ;;
+        esac
+    fi
+}
+
+complete -F _buk_completions buk
