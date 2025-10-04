@@ -102,13 +102,6 @@ To uninstall **buk**:
 Below are the flow diagrams for each command. Click on a command to expand its diagram:
 
 <details>
-<summary>help</summary>
-
-![help flow](doc/diagrams/help.svg)
-
-</details>
-
-<details>
 <summary>init</summary>
 
 ![init flow](doc/diagrams/init.svg)
