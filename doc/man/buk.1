@@ -1,0 +1,85 @@
+.TH BUK 1 "September 2025" "Buk 1.0.0" "Buk Manual"
+.SH NAME
+buk \- a simple command-line tool for managing backups.
+
+.SH SYNOPSIS
+\fIbuk\fR [-v | --version] [-h | --help] <command> [<args>]
+
+.SH DESCRIPTION
+Buk is a simple command-line tool for backups, similar to Git but focused
+on backups rather than versioning. It is easily integrable into scripts and
+provides a straightforward way to manage file and directory backups.
+
+The tool operates by maintaining a backup directory where copies of files and
+directories are stored. Users can save, delete, and restore backups as needed.
+The default backup directory is \fI/home/username/.buk_backups\fR but can be
+configured to any location.
+
+Before using \fBbuk\fR, the current directory must be initialized with the
+\fBinit\fR command. The backup directory path can be customized using the
+\fBconfig\fR command.
+
+.SH OPTIONS
+.TP 4
+-v, --version
+Prints the \fIbuk\fR version that was installed.
+
+If --help is also given, it takes precedence over --version.
+
+.TP 4
+-h, --help
+Prints the synopsis and a list of all available commands.
+
+If --help is also given, it takes precedence over --version.
+
+
+.SH COMMANDS
+.TP 4
+\fBinit\fR
+Initialize the current directory for use with \fBbuk\fR. This command must be
+run before any other \fBbuk\fR operations can be performed in a directory.
+.TP 4
+\fBconfig\fR <path>
+Configure the path of the backup directory. If not specified, the default
+backup directory is \fI/home/username/.buk_backups\fR.
+.TP 4
+\fBsave\fR <file|dir> [<file|dir>...]
+Save the specified files or directories to the backup directory. Multiple
+files and directories can be specified in a single command.
+.TP 4
+\fBdelete\fR <file|dir> [<file|dir>...]
+Delete the specified files or directories from the backup directory. Multiple
+files and directories can be specified in a single command.
+.TP 4
+\fBrestore\fR <file|dir> [<file|dir>...]
+Restore the specified files or directories from the backup directory to the
+local directory. Multiple files and directories can be specified in a single
+command.
+
+.SH EXAMPLES
+Initialize the current directory:
+.IP
+buk init
+.PP
+Configure a custom backup directory:
+.IP
+buk config /path/to/backup/directory
+.PP
+Save a multiple files and directories:
+.IP
+buk save important_file.txt directory1/
+.PP
+Save entire directory:
+.IP
+buk save .
+.PP
+Delete a backup:
+.IP
+buk delete old_file.txt
+.PP
+Restore files from backup:
+.IP
+buk restore important_file.txt directory1/
+
+.SH SEE ALSO
+cp(1), rsync(1), tar(1)

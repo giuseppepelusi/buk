@@ -18,11 +18,11 @@ int main(int argc, char *argv[])
 		buk_help();
 		return EXIT_FAILURE;
 	}
-	else if (strcmp(option, "help") == 0)
+	else if (strcmp(option, "--help") == 0 || strcmp(option, "-h") == 0)
 	{
 		buk_help();
 	}
-	else if (strcmp(option, "--version") == 0)
+	else if (strcmp(option, "--version") == 0 || strcmp(option, "-v") == 0)
 	{
 		printf("%s version %s\n", NAME, VERSION);
 	}
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	{
 		if (argc > 2)
 		{
-			buk_help_init();
+			buk_usage("init", NULL);
 			return EXIT_FAILURE;
 		}
 		buk_init();
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	{
 		if (argc != 3)
 		{
-			buk_help_config();
+			buk_usage("config", "<path>");
 			return EXIT_FAILURE;
 		}
 		buk_config(argv);
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	{
 		if (argc < 3)
 		{
-			buk_help_save();
+			buk_usage("save", "<file|dir> [<file|dir>...]");
 			return EXIT_FAILURE;
 		}
 		buk_save(argc, argv);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	{
 		if (argc < 3)
 		{
-			buk_help_delete();
+			buk_usage("delete", "<file|dir> [<file|dir>...]");
 			return EXIT_FAILURE;
 		}
 		buk_delete(argc, argv);
@@ -66,14 +66,14 @@ int main(int argc, char *argv[])
 	{
 		if (argc < 3)
 		{
-			buk_help_restore();
+			buk_usage("restore", "<file|dir> [<file|dir>...]");
 			return EXIT_FAILURE;
 		}
 		buk_restore(argc, argv);
 	}
 	else
 	{
-		fprintf(stderr, "%s: \'%s\' is not a %s command. See '%s help'.\n", NAME, argv[1], NAME, NAME);
+		fprintf(stderr, "%s: \'%s\' is not a %s command. See '%s --help'.\n", NAME, argv[1], NAME, NAME);
 		return EXIT_FAILURE;
 	}
 

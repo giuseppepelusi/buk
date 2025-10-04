@@ -4,47 +4,23 @@
 
 void buk_help()
 {
-	printf("usage: %s <command> [<args>]\n\n", NAME);
+	printf("usage: %s [-v | --version] [-h | --help] <command> [<args>]\n", NAME);
+	printf("\n");
 	printf("These are the available %s commands:\n", NAME);
-	printf("  help:\t\tShow the help page\n");
-	printf("  init:\t\tInitialize the current directory\n");
-	printf("  config:\tConfigure the path of the backup directory\n");
-	printf("  save:\t\tSave the passed files or directories to the backup directory\n");
-	printf("  delete:\tDelete the passed files or directories from the backup directory\n");
-	printf("  restore:\tRestore the passed files or directories from the backup\n\t\tdirectory to the local directory\n");
+	printf("\n");
+	printf("   init        Initialize backup tracking in the current directory\n");
+	printf("   config      Set the backup directory path\n");
+	printf("   save        Save files or directories to the backup\n");
+	printf("   delete      Remove files or directories from the backup\n");
+	printf("   restore     Restore files or directories from the backup\n");
+	printf("\n");
+	printf("Use \'man buk\' for a complete guide and examples.\n");
 }
 
-void buk_help_init()
+void buk_usage(const char *cmd, const char *args)
 {
-	printf("%s: malformed expression\n\n", NAME);
-	printf("usage: %s init\n", NAME);
-	printf("Use \"%s help\" for additional information\n", NAME);
-}
-
-void buk_help_config()
-{
-	printf("%s: malformed expression\n\n", NAME);
-	printf("usage: %s config <path>\n", NAME);
-	printf("Use \"%s help\" for additional information\n", NAME);
-}
-
-void buk_help_save()
-{
-	printf("%s: malformed expression\n\n", NAME);
-	printf("usage: %s save <file|dir> [<file|dir>...]\n", NAME);
-	printf("Use \"%s help\" for additional information\n", NAME);
-}
-
-void buk_help_delete()
-{
-	printf("%s: malformed expression\n\n", NAME);
-	printf("usage: %s delete <file|dir> [<file|dir>...]\n", NAME);
-	printf("Use \"%s help\" for additional information\n", NAME);
-}
-
-void buk_help_restore()
-{
-	printf("%s: malformed expression\n\n", NAME);
-	printf("usage: %s restore <file|dir> [<file|dir>...]\n", NAME);
-	printf("Use \"%s help\" for additional information\n", NAME);
+    fprintf(stderr, "error: invalid arguments\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "usage: %s %s %s\n", NAME, cmd, args ? args : "");
+    fprintf(stderr, "Use '%s --help' for more information\n", NAME);
 }
